@@ -18,6 +18,7 @@ defmodule LiftMeUp.Application do
     |> String.to_atom
 
     {:ok, _} = Node.start(node_name, :longnames, 1000)
+    Node.set_cookie(:safarikjeks)
     opts = [strategy: :one_for_one, name: LiftMeUp.Supervisor]
     Supervisor.start_link(children, opts)
   end
