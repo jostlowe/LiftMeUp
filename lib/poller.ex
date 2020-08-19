@@ -15,7 +15,7 @@ defmodule Poller do
   ### Initialization
 
   def init([]) do
-    state = %Poller{}
+    state = %Poller{sensor_state: 0}
     |> start_polling_timer
     |> initialize_button_state
 
@@ -83,7 +83,7 @@ defmodule Poller do
       _ -> nil
     end
 
-    {:noreply, %{state | button_states: new_button_states}}
+    {:noreply, %{state | button_states: new_button_states, sensor_state: new_sensor_state}}
 
   end
 
