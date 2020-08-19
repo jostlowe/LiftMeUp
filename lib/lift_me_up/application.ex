@@ -24,7 +24,7 @@ defmodule LiftMeUp.Application do
 
 
   def get_my_ip do
-    {:ok, socket} = :gen_udp.open(6789, [active: false, broadcast: true])
+    {:ok, socket} = :gen_udp.open(6790, [active: false, broadcast: true])
     :ok = :gen_udp.send(socket, {255,255,255,255}, 6790, "test packet")
     ip = case :gen_udp.recv(socket, 100, 1000) do
       {:ok, {ip, _port, _data}} -> ip
