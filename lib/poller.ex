@@ -1,6 +1,7 @@
 defmodule Poller do
   use GenServer
   require Logger
+  require Order
 
   defstruct [:socket, :button_states, :timer_ref, :sensor_state]
 
@@ -79,7 +80,7 @@ defmodule Poller do
     new_sensor_state = Driver.get_floor_sensor_state
 
     case {old_sensor_state, new_sensor_state} do
-      {:between_floors, floor} -> LiftMeUp.enter_floor(floor)
+      {:between_floors, floor} when Order.is_floor(floor) -> LiftMeUp.enter_floor(floor)
       _ -> nil
     end
 
