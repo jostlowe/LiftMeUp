@@ -1,6 +1,7 @@
 defmodule LiftMeUp do
   use GenServer
   require Logger
+  require Order
 
   @ping_rate 1000
   @broadcast_ip {255,255,255,255}
@@ -45,6 +46,10 @@ defmodule LiftMeUp do
     order
     |> Map.put(:owner, node)
     |> store_order
+  end
+
+  def enter_floor(floor) when Order.is_floor(floor) do
+    Logger.info("Entered Floor: #{floor}")
   end
 
 

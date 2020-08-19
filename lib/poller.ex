@@ -2,7 +2,7 @@ defmodule Poller do
   use GenServer
   require Logger
 
-  defstruct [:socket, :button_states, :timer_ref]
+  defstruct [:socket, :button_states, :timer_ref, :sensor_state]
 
 
   ### Public API
@@ -50,7 +50,7 @@ defmodule Poller do
 
   defp get_changed_buttons(old_states, new_states) do
 
-    edge_detector = fn (_button, old_state, new_state) ->
+    button_edge_detector = fn (_button, old_state, new_state) ->
       case {old_state, new_state} do
         {0, 1} -> :rising
         {1, 0} -> :falling
@@ -59,7 +59,7 @@ defmodule Poller do
     end
 
     old_states
-    |> Map.merge(new_states, edge_detector)
+    |> Map.merge(new_states, button_edge_detector)
     |> Map.to_list
     |> Enum.filter(fn {_button, changed?} -> changed? == :rising end)
     |> Enum.map(fn {button, _changed?} -> button end)
@@ -67,7 +67,7 @@ defmodule Poller do
 
   ### Callbacks
 
-  def handle_info(:do_poll, %Poller{button_states: old_button_states} = state) do
+  def handle_info(:do_poll, %Poller{button_states: old_button_states, sensor_state: old_sensor_state} = state) do
     new_button_states = get_button_states()
     changed_buttons = get_changed_buttons(old_button_states, new_button_states)
 
@@ -75,6 +75,13 @@ defmodule Poller do
       Logger.info("Button Pressed: #{order.type} #{order.floor}")
       LiftMeUp.broker_order(order)
     end)
+
+    new_sensor_state = Driver.get_floor_sensor_state
+
+    case {old_sensor_state, new_sensor_state} do
+      {:between_floors, floor} -> LiftMeUp.enter_floor(floor)
+      _ -> nil
+    end
 
     {:noreply, %{state | button_states: new_button_states}}
 
